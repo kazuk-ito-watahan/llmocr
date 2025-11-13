@@ -163,22 +163,31 @@ table td {
           prompt
         }),
       });
-
       if (!res.ok) throw new Error(await res.text());
-
       const data = await res.json();
-      const txt = data.text ?? JSON.stringify(data, null, 2);
 
-      if (txt.includes("<table")) {
-      out.innerHTML = txt;
-      } else {
-      out.textContent = txt;
+      let txt = data.text ?? JSON.stringify(data, null, 2);
+
+      // デバッグ用に中身確認（1回だけでもやっとくと安心）
+      console.log("RAW:", txt);
+
+      // ① もし &lt;table&gt; のようにエスケープされていたら、一度デコードする
+      if (txt.includes("&lt;")) {
+        const textarea = document.createElement("textarea");
+        textarea.innerHTML = txt;   // &lt; を < に戻す
+        txt = textarea.value;
       }
 
+      // ② HTMLテーブルが含まれていれば innerHTML で展開
+      if (txt.toLowerCase().includes("<table")) {
+        out.innerHTML = txt;
+      } else {
+        out.textContent = txt;
+      }
+      } catch (err) {
+        out.textContent = "❌ エラー: " + err.message;
+      }
 
-    } catch (err) {
-      out.textContent = "❌ エラー: " + err.message;
-    }
       
     });
 
