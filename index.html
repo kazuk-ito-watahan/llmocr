@@ -169,12 +169,12 @@ table td {
       const data = await res.json();
       const txt = data.text ?? JSON.stringify(data, null, 2);
 
-      // ▼ HTMLテーブル判定と描画 ▼
-      if (txt.trim().toLowerCase().startsWith("<table")) {
-        out.innerHTML = txt;            // HTMLとして描画
+      if (txt.includes("<table")) {
+      out.innerHTML = txt;
       } else {
-        out.textContent = txt;          // プレーンテキスト描画
+      out.textContent = txt;
       }
+
 
     } catch (err) {
       out.textContent = "❌ エラー: " + err.message;
