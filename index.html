@@ -153,24 +153,33 @@ table td {
       out.textContent = "🔄 解析中…";
 
       try {
-        const dataBase64 = await fileToBase64(file);
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            filename: file.name,
-            mimeType: file.type || "application/pdf",
-            dataBase64,
-            prompt
-          }),
-        });
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filename: file.name,
+          mimeType: file.type,
+          dataBase64,
+          prompt
+        }),
+      });
 
-        if (!res.ok) throw new Error(await res.text());
-        const data = await res.json();
-        out.textContent = data.text ?? JSON.stringify(data, null, 2);
-      } catch (err) {
-        out.textContent = "❌ エラー: " + err.message;
+      if (!res.ok) throw new Error(await res.text());
+
+      const data = await res.json();
+      const txt = data.text ?? JSON.stringify(data, null, 2);
+
+      // ▼ HTMLテーブル判定と描画 ▼
+      if (txt.trim().toLowerCase().startsWith("<table")) {
+        out.innerHTML = txt;            // HTMLとして描画
+      } else {
+        out.textContent = txt;          // プレーンテキスト描画
       }
+
+    } catch (err) {
+      out.textContent = "❌ エラー: " + err.message;
+    }
+      
     });
 
     function fileToBase64(file) {
